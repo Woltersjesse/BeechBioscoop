@@ -1,66 +1,60 @@
 <?php
 
-// Chair Interface
-interface Chair {
-    public function getType(): string;
-    public function reserve(): void;
+abstract class Chair
+{
+    protected bool $reserved = false;
+
+    abstract public function getType(): string;
+
+    public function reserve(): bool
+    {
+        if ($this->reserved) {
+            echo 'This ' . $this->getType() . ' is already reserved.' . PHP_EOL;
+            return false;
+        } else {
+            $this->reserved = true;
+            echo $this->getType() . ' reserved.' . PHP_EOL;
+            return true;
+        }
+    }
 }
 
 // Concrete Chair Classes
-class NormalChair implements Chair {
-    private $reserved = false;
-
-    public function getType(): string {
+class NormalChair extends Chair
+{
+    public function getType(): string
+    {
         return 'Normal Chair';
     }
-
-    public function reserve(): void {
-        if ($this->reserved) {
-            echo 'This normal chair is already reserved.' . PHP_EOL;
-        } else {
-            $this->reserved = true;
-            echo 'Normal chair reserved.' . PHP_EOL;
-        }
-    }
 }
 
-class LuxuryChair implements Chair {
-    private $reserved = false;
-
-    public function getType(): string {
+class LuxuryChair extends Chair
+{
+    public function getType(): string
+    {
         return 'Luxury Chair';
     }
+}
 
-    public function reserve(): void {
-        if ($this->reserved) {
-            echo 'This luxury chair is already reserved.' . PHP_EOL;
-        } else {
-            $this->reserved = true;
-            echo 'Luxury chair reserved.' . PHP_EOL;
-        }
+class WheelchairChair extends Chair
+{
+    public function getType(): string
+    {
+        return 'Wheelchair Accessible Seat';
     }
 }
 
-class WheelchairChair implements Chair {
-    private $reserved = false;
 
-    public function getType(): string {
-        return 'Wheelchair Accessible Seat';
-    }
-
-    public function reserve(): void {
-        if ($this->reserved) {
-            echo 'This wheelchair accessible seat is already reserved.' . PHP_EOL;
-        } else {
-            $this->reserved = true;
-            echo 'Wheelchair accessible seat reserved.' . PHP_EOL;
-        }
-    }
+// Custom Exception for Invalid Chair Type
+class InvalidChairTypeException extends Exception
+{
 }
 
 // Chair Factory
-class ChairFactory {
-    public static function createChair(string $type): Chair {
+class ChairFactory
+{
+    public static function createChair(string $type): Chair
+    {
         switch ($type) {
             case 'normal':
                 return new NormalChair();
@@ -69,23 +63,25 @@ class ChairFactory {
             case 'wheelchair':
                 return new WheelchairChair();
             default:
-                throw new Exception('Invalid chair type');
+                throw new InvalidChairTypeException('Invalid chair type: ' . $type);
         }
     }
 }
 
 // Cinema Reservation System
-class Cinema {
-    private $chairs = [];
+class Cinema
+{
+    private array $chairs = [];
 
-    public function __construct(array $chairTypes) {
-        // Create chairs based on the provided types
+    public function __construct(array $chairTypes)
+    {
         foreach ($chairTypes as $type) {
             $this->chairs[] = ChairFactory::createChair($type);
         }
     }
 
-    public function reserveChair(int $index): void {
+    public function reserveChair(int $index): void
+    {
         if ($index >= 0 && $index < count($this->chairs)) {
             $chair = $this->chairs[$index];
             echo "Attempting to reserve: " . $chair->getType() . PHP_EOL;
@@ -95,14 +91,14 @@ class Cinema {
         }
     }
 
-    public function showAvailableChairs(): void {
+    public function showAvailableChairs(): void
+    {
         echo 'Available Chairs in the Cinema:' . PHP_EOL;
         foreach ($this->chairs as $index => $chair) {
             echo ($index + 1) . '. ' . $chair->getType() . PHP_EOL;
         }
     }
 }
-
 // Usage Example
 $cinema = new Cinema(['normal', 'luxury', 'normal', 'wheelchair', 'luxury']);
 $cinema->showAvailableChairs();
@@ -113,4 +109,5 @@ $cinema->reserveChair(3); // Reserve Wheelchair Accessible Seat
 $cinema->reserveChair(2); // Reserve Normal Chair
 $cinema->showAvailableChairs();
 
+?>
 ?>
